@@ -1,0 +1,215 @@
+:root {
+  --tile-dim: 50px;
+  --board-dim: 15;
+}
+
+html {
+  font-size: 10px;
+}
+
+#board {
+  width: calc(var(--tile-dim) * var(--board-dim));
+  height: calc(var(--tile-dim) * var(--board-dim));
+  /*margin-left:10px;*/
+  background-color: #D7D7D8;
+  margin-bottom:1.3rem;
+  margin-top:1rem;
+  }
+
+.outer {
+  background-color: #D7D7D8;
+}
+
+.tile_rack {
+  margin:2rem;
+  height:calc(var(--tile-dim) * 2);
+  background-color: #D7D7D8;
+  border:2px solid darkgray;
+  border-radius: .5rem;
+}
+
+#side-board {
+  margin:auto;
+  background-color: #F9E9D6;
+  height: calc(var(--tile-dim) * var(--board-dim));
+  margin-bottom:1rem;
+  margin-top:1.3rem;
+  border:2px solid darkgray;
+  border-radius: 1rem;
+}
+
+.boardRow {
+  line-height: 0px;
+  margin:0px;
+  padding:0px;
+}
+.position {
+  display:inline-block;
+  width:var(--tile-dim);
+  height:var(--tile-dim);
+  /*line-height: 0px;*/
+}
+
+.empty_position {
+  background-size: var(--tile-dim);
+  background-image: url("../images/empty_tile.png");
+}
+
+.start_position {
+  background-size: var(--tile-dim);
+  background-image: url("../images/start_tile.png");
+}
+
+.double_letter_position {
+  background-size: var(--tile-dim);
+  background-image: url("../images/double_letter_tile.png");
+}
+
+.triple_letter_position {
+  background-size: var(--tile-dim);
+  background-image: url("../images/triple_letter_tile.png");
+}
+
+.double_word_position {
+  background-size: var(--tile-dim);
+  background-image: url("../images/double_word_tile.png");
+}
+
+.triple_word_position {
+  background-size: var(--tile-dim);
+  background-image: url("../images/triple_word_tile.png");
+}
+
+.blank_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/blank_tile.png");
+}
+
+.a_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/a_tile.png");
+}
+
+.b_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/b_tile.png");
+}
+
+.c_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/c_tile.png");
+}
+
+.d_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/d_tile.png");
+}
+
+.e_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/e_tile.png");
+}
+
+.f_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/f_tile.png");
+}
+
+.g_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/g_tile.png");
+}
+
+.h_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/h_tile.png");
+}
+
+.i_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/i_tile.png");
+}
+
+.j_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/j_tile.png");
+}
+
+.k_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/k_tile.png");
+}
+
+.l_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/l_tile.png");
+}
+
+.m_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/m_tile.png");
+}
+
+.n_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/n_tile.png");
+}
+
+.o_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/o_tile.png");
+}
+
+.p_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/p_tile.png");
+}
+
+.q_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/q_tile.png");
+}
+
+.r_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/r_tile.png");
+}
+
+.s_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/s_tile.png");
+}
+
+.t_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/t_tile.png");
+}
+
+.u_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/u_tile.png");
+}
+
+.v_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/v_tile.png");
+}
+
+.w_tile {
+  background-image: url('../images/w_tile.png');
+}
+
+.x_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/x_tile.png");
+}
+
+.y_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/y_tile.png");
+}
+
+.z_tile {
+  background-size: var(--tile-dim);
+  background-image: url("../images/z_tile.png");
+}
