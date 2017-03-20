@@ -1,27 +1,197 @@
 document.addEventListener("DOMContentLoaded", function() {
   let boardDim = 14
   board = buildBoard(boardDim,boardDim);
-  // console.dir(board);
   setBonuses();
+  fillTileBag();
+  addPlayers(playerCount);
+  fillRack(players);
+  displayRack(players,playerCount);
+  setButtonEvents()
 });
 
 const rackSize = 7;
+const playerCount = 4;
 let board = [];
+let tileBag = [];
+let players = [];
+let currentPlayer = 1;
+let selectedTile = '';
+
+function addPlayers(count) {
+  if (count > 0) {
+    addPlayers(count-1);
+    players.push({
+      id:count-1,
+      score:0,
+      tiles:[]
+    });
+    $(`#players`).append(`<div id="player_${count-1}" class="tile_rack"></div>`);
+    $(`#player_${count-1}`).append(`<div class="h4 text-left player_title">Player ${count-1} - Score: ${players[count-1].score}</div>`);
+  }
+}
+
+function setButtonEvents() {
+  $('#next_player').click(nextPlayer);
+  let positions = $(`.position`);
+  setPositionEvents(positions,positions.length-1);
+}
+
+function overPosition(e) {
+  if (selectedTile != '') {
+    let position = $(e.target);
+    let row = $(position).attr('id').split('_')[0];
+    let col = $(position).attr('id').split('_')[1];
+    if (board[row][col].playedLetter == '' && board[row][col].playedLetter == '') {
+      let bonus = board[row][col].bonus;
+      position.removeClass(bonus);
+      position.addClass($(`#${selectedTile}`).data('tile'));
+    }
+  }
+}
+
+function outPosition(e) {
+  if (selectedTile != '') {
+      let position = $(e.target);
+    let row = $(position).attr('id').split('_')[0];
+    let col = $(position).attr('id').split('_')[1];
+    if (board[row][col].playedLetter == '' && board[row][col].playedLetter == '') {
+      let bonus = board[row][col].bonus;
+      position.addClass(bonus);
+      position.removeClass($(`#${selectedTile}`).data('tile'));
+    }
+  }
+}
+
+function setPositionEvents(positions,count) {
+  if (count > 0) {
+    let position = positions[count];
+    $(position).hover(overPosition,outPosition);
+    setPositionEvents(positions,count-1);
+  }
+}
+
+
+
+function nextPlayer() {
+  if (currentPlayer == playerCount - 1) {
+    currentPlayer = 0;
+  } else {
+    currentPlayer++;
+  }
+  clearRack(players,playerCount);
+  displayRack(players,playerCount);
+}
+
+function clearRack(players,id) {
+  if (id > 0) {
+    let player = players[id-1];
+    clearRack(players,id-1);
+    $(`#player_${id-1}`).empty();
+    $(`#player_${id-1}`).append(`<div class="h4 text-left player_title">Player ${id-1} - Score: ${players[id-1].score}</div>`);
+  }
+}
+
+function displayRack(players,id) {
+  if (id > 0) {
+    let player = players[id-1];
+    displayRack(players,id-1);
+    appendTiles(player.id,player.tiles.length)
+  }
+}
+
+function appendTiles(playerId,count) {
+  if (count > 0) {
+    let tiles = appendTiles(playerId,count-1);
+    $(`#player_${playerId}`).append(`<div id="player_${playerId}_tile_${count}" class="${playerId == currentPlayer ? players[playerId].tiles[count-1] + '_tile' : 'blank_tile'} rack_tile ${playerId == currentPlayer ? ' currentPlayer' : ''}"></div>`);
+    $(`#player_${playerId}_tile_${count}`).data( "tile", players[playerId].tiles[count-1]+ '_tile');
+    if (playerId == currentPlayer) {
+      $(`#player_${playerId}_tile_${count}`).click(selectTile);
+    }
+  }
+}
+
+function selectTile(e) {
+  let playerId = $(e.target).attr('id').substring(7,8);
+  unselectTiles(playerId,players[playerId].tiles.length);
+  $(e.target).addClass('selectedTile');
+  selectedTile = $(e.target).attr('id');
+}
+
+function unselectTiles(playerId,count) {
+  if (count > 0) {
+    let player = players[playerId];
+    unselectTiles(playerId,count-1);
+    $(`#player_${playerId}_tile_${count}`).removeClass('selectedTile');
+  }
+}
+
+function fillRack(players) {
+  if (players.length > 0) {
+    let player = players.pop();
+    fillRack(players);
+    player.tiles = pickTiles(7-player.tiles.length);
+    players.push(player);
+  }
+}
+
+function pickTiles(count) {
+  let tiles = [];
+  if (count > 0 ) {
+    tiles = pickTiles(count-1);
+    let randomTile = tileBag.splice(Math.floor(Math.random()*tileBag.length),1)[0]
+    tiles.push(randomTile);
+  }
+  return tiles;
+}
+
+function fillTileBag() {
+  addLetterToBag('a', 9);
+  addLetterToBag('b', 2);
+  addLetterToBag('c', 2);
+  addLetterToBag('d', 4);
+  addLetterToBag('e', 12);
+  addLetterToBag('f', 2);
+  addLetterToBag('g', 3);
+  addLetterToBag('h', 2);
+  addLetterToBag('i', 9);
+  addLetterToBag('j', 1);
+  addLetterToBag('k', 1);
+  addLetterToBag('l', 4);
+  addLetterToBag('m', 2);
+  addLetterToBag('n', 6);
+  addLetterToBag('o', 8);
+  addLetterToBag('p', 2);
+  addLetterToBag('q', 1);
+  addLetterToBag('r', 6);
+  addLetterToBag('s', 4);
+  addLetterToBag('t', 6);
+  addLetterToBag('u', 4);
+  addLetterToBag('v', 2);
+  addLetterToBag('w', 2);
+  addLetterToBag('x', 1);
+  addLetterToBag('y', 2);
+  addLetterToBag('z', 1);
+  addLetterToBag('blank', 2);
+}
+
+function addLetterToBag(letter, count) {
+  if (count > 0) {
+    addLetterToBag(letter,count-1);
+    tileBag.push(letter);
+  }
+}
 
 function buildBoard(rows,cols) {
   let board = [];
-  // console.log(`buildBoard: ${rows} ${cols}`);
   if (rows > 0) {
     board = board.concat(buildBoard(rows-1,cols));
   }
   $('#board').append(`<div id="row_${rows}" class="boardRow">`);
   board.push(buildRow(rows,cols));
-  // $('#board').append(`</div>`);
   return board;
 }
 
 function buildRow(rowNum,colNum) {
-  // console.log(`buildRow: ${rowNum} ${colNum}`);
   let boardRow = [];
   if (colNum > 0) {
     boardRow = boardRow.concat(buildRow(rowNum,colNum-1));
@@ -95,8 +265,7 @@ function finalizeLetter(row,col) {
 }
 
 function setTile(row,col,bonus) {
-  // console.log(`${row} : ${col} : ${board[row][col]} : ${board[row][col].bonus} : ${bonus}`);
-  board[row][col][bonus] = bonus;
+  board[row][col]['bonus'] = bonus;
   $(`#${row}_${col}`).addClass(bonus);
 }
 

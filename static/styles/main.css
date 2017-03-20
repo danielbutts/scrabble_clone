@@ -22,16 +22,22 @@ html {
 
 .tile_rack {
   margin:2rem;
-  height:calc(var(--tile-dim) * 2);
+  height:calc(var(--tile-dim) * 2.5);
   background-color: #D7D7D8;
   border:2px solid darkgray;
   border-radius: .5rem;
+  /*padding-top:20px;*/
+}
+
+.player_title {
+  padding-left: 1.2rem;
 }
 
 #side-board {
   margin:auto;
   background-color: #F9E9D6;
   height: calc(var(--tile-dim) * var(--board-dim));
+  width: calc(var(--tile-dim) * 10);
   margin-bottom:1rem;
   margin-top:1.3rem;
   border:2px solid darkgray;
@@ -43,156 +49,158 @@ html {
   margin:0px;
   padding:0px;
 }
-.position {
+
+.position, .empty_position, .start_position, .double_letter_position, .triple_letter_position, .double_word_position, .triple_word_position {
   display:inline-block;
   width:var(--tile-dim);
   height:var(--tile-dim);
-  /*line-height: 0px;*/
+  background-size: var(--tile-dim);
+}
+
+.blank_tile, .a_tile, .b_tile, .c_tile, .d_tile, .e_tile, .f_tile, .g_tile, .h_tile, .i_tile, .j_tile, .k_tile, .l_tile, .m_tile, .n_tile, .o_tile, .p_tile, .q_tile, .r_tile, .s_tile, .t_tile, .u_tile, .v_tile, .w_tile, .x_tile, .y_tile, .z_tile {
+  display:inline-block;
+  width: var(--tile-dim);
+  height: var(--tile-dim);
+  background-size: var(--tile-dim);
+}
+
+.rack_tile {
+  border:5px solid #D7D7D8;
+  border-radius: 5px;
+  width: calc(var(--tile-dim) + 10px);
+  height: calc(var(--tile-dim) + 10px);
+}
+
+.rack_tile.currentPlayer:hover {
+  border:5px solid #EAAFB4;
+}
+
+.rack_tile.selectedTile {
+  border:5px solid #4273BF;
+}
+
+.rack_tile.selectedTile:hover {
+  border:5px solid #4273BF;
+}
+
+.rack_tile.selected {
+  border:5px solid darkgray;
 }
 
 .empty_position {
-  background-size: var(--tile-dim);
   background-image: url("../images/empty_tile.png");
 }
 
 .start_position {
-  background-size: var(--tile-dim);
   background-image: url("../images/start_tile.png");
 }
 
 .double_letter_position {
-  background-size: var(--tile-dim);
   background-image: url("../images/double_letter_tile.png");
 }
 
 .triple_letter_position {
-  background-size: var(--tile-dim);
   background-image: url("../images/triple_letter_tile.png");
 }
 
 .double_word_position {
-  background-size: var(--tile-dim);
   background-image: url("../images/double_word_tile.png");
 }
 
 .triple_word_position {
-  background-size: var(--tile-dim);
   background-image: url("../images/triple_word_tile.png");
 }
 
 .blank_tile {
-  background-size: var(--tile-dim);
   background-image: url("../images/blank_tile.png");
 }
 
 .a_tile {
-  background-size: var(--tile-dim);
   background-image: url("../images/a_tile.png");
 }
 
 .b_tile {
-  background-size: var(--tile-dim);
   background-image: url("../images/b_tile.png");
 }
 
 .c_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/c_tile.png");
+    background-image: url("../images/c_tile.png");
 }
 
 .d_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/d_tile.png");
+    background-image: url("../images/d_tile.png");
 }
 
 .e_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/e_tile.png");
+    background-image: url("../images/e_tile.png");
 }
 
 .f_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/f_tile.png");
+    background-image: url("../images/f_tile.png");
 }
 
 .g_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/g_tile.png");
+    background-image: url("../images/g_tile.png");
 }
 
 .h_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/h_tile.png");
+    background-image: url("../images/h_tile.png");
 }
 
 .i_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/i_tile.png");
+    background-image: url("../images/i_tile.png");
 }
 
 .j_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/j_tile.png");
+    background-image: url("../images/j_tile.png");
 }
 
 .k_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/k_tile.png");
+    background-image: url("../images/k_tile.png");
 }
 
 .l_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/l_tile.png");
+    background-image: url("../images/l_tile.png");
 }
 
 .m_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/m_tile.png");
+    background-image: url("../images/m_tile.png");
 }
 
 .n_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/n_tile.png");
+    background-image: url("../images/n_tile.png");
 }
 
 .o_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/o_tile.png");
+    background-image: url("../images/o_tile.png");
 }
 
 .p_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/p_tile.png");
+    background-image: url("../images/p_tile.png");
 }
 
 .q_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/q_tile.png");
+    background-image: url("../images/q_tile.png");
 }
 
 .r_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/r_tile.png");
+    background-image: url("../images/r_tile.png");
 }
 
 .s_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/s_tile.png");
+    background-image: url("../images/s_tile.png");
 }
 
 .t_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/t_tile.png");
+    background-image: url("../images/t_tile.png");
 }
 
 .u_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/u_tile.png");
+    background-image: url("../images/u_tile.png");
 }
 
 .v_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/v_tile.png");
+    background-image: url("../images/v_tile.png");
 }
 
 .w_tile {
@@ -200,16 +208,13 @@ html {
 }
 
 .x_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/x_tile.png");
+    background-image: url("../images/x_tile.png");
 }
 
 .y_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/y_tile.png");
+    background-image: url("../images/y_tile.png");
 }
 
 .z_tile {
-  background-size: var(--tile-dim);
-  background-image: url("../images/z_tile.png");
+    background-image: url("../images/z_tile.png");
 }
