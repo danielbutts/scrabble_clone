@@ -41,7 +41,7 @@ function overPosition(e) {
     let position = $(e.target);
     let row = $(position).attr('id').split('_')[0];
     let col = $(position).attr('id').split('_')[1];
-    if (board[row][col].playedLetter == '' && board[row][col].playedLetter == '') {
+    if (board[row][col].playedLetter == '' && board[row][col].fixedLetter == '') {
       let bonus = board[row][col].bonus;
       position.removeClass(bonus);
       position.addClass($(`#${selectedTile}`).data('tile'));
@@ -54,7 +54,7 @@ function outPosition(e) {
       let position = $(e.target);
     let row = $(position).attr('id').split('_')[0];
     let col = $(position).attr('id').split('_')[1];
-    if (board[row][col].playedLetter == '' && board[row][col].playedLetter == '') {
+    if (board[row][col].playedLetter == '' && board[row][col].fixedLetter == '') {
       let bonus = board[row][col].bonus;
       position.addClass(bonus);
       position.removeClass($(`#${selectedTile}`).data('tile'));
@@ -62,15 +62,37 @@ function outPosition(e) {
   }
 }
 
+function placeTile(e) {
+  console.log('placeTile');
+  let position = $(e.target);
+  let row = $(position).attr('id').split('_')[0];
+  let col = $(position).attr('id').split('_')[1];
+  if (selectedTile != '' && board[row][col].fixedLetter == '') {
+    if (board[row][col].playedLetter == '') {
+      console.log('currently empty '+$(`#${selectedTile}`).data('tile'));
+
+      let bonus = board[row][col].bonus;
+      position.addClass($(`#${selectedTile}`).data('tile'));
+      position.removeClass(bonus);
+      $(`#${selectedTile}`).addClass('placedTile')
+      board[row][col].playedLetter = selectedTile;
+      selectedTile = '';
+    }
+  } else if (selectedTile == '' && board[row][col].playedLetter != '') {
+    //TODO return tile to rack (i.e. change it's class from played.)
+    let removedTile = board[row][col].playedLetter;
+    position.addClass(removedTile+'_tile');
+  }
+}
+
 function setPositionEvents(positions,count) {
   if (count > 0) {
     let position = positions[count];
     $(position).hover(overPosition,outPosition);
+    $(position).click(placeTile);
     setPositionEvents(positions,count-1);
   }
 }
-
-
 
 function nextPlayer() {
   if (currentPlayer == playerCount - 1) {
@@ -113,8 +135,13 @@ function appendTiles(playerId,count) {
 function selectTile(e) {
   let playerId = $(e.target).attr('id').substring(7,8);
   unselectTiles(playerId,players[playerId].tiles.length);
-  $(e.target).addClass('selectedTile');
-  selectedTile = $(e.target).attr('id');
+  if (selectedTile != $(e.target).attr('id')) {
+    $(e.target).addClass('selectedTile');
+    selectedTile = $(e.target).attr('id');
+  } else {
+    selectedTile = '';
+    $(e.target).removeClass('selectedTile');
+  }
 }
 
 function unselectTiles(playerId,count) {

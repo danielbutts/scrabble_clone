@@ -83,9 +83,13 @@ html {
   border:5px solid #4273BF;
 }
 
-.rack_tile.selected {
+.rack_tile.placedTile {
   border:5px solid darkgray;
 }
+
+/*.rack_tile.selected {
+  border:5px solid darkgray;
+}*/
 
 .empty_position {
   background-image: url("../images/empty_tile.png");
