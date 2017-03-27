@@ -71,7 +71,7 @@ html {
   height: calc(var(--tile-dim) + 10px);
 }
 
-.rack_tile.currentPlayer:hover {
+/*.rack_tile.currentPlayer:hover {
   border:5px solid #EAAFB4;
 }
 
@@ -81,11 +81,11 @@ html {
 
 .rack_tile.selectedTile:hover {
   border:5px solid #4273BF;
-}
+}*/
 
-.rack_tile.placedTile {
+/*.rack_tile.placedTile {
   border:5px solid darkgray;
-}
+}*/
 
 /*.rack_tile.selected {
   border:5px solid darkgray;
@@ -221,4 +221,112 @@ html {
 
 .z_tile {
     background-image: url("../images/z_tile.png");
+}
+
+.blank_tile.fixed {
+  background-image: url("../images/blank_tile_placed.png");
+}
+
+.a_tile.fixed {
+  background-image: url("../images/a_tile_placed.png");
+}
+
+.b_tile.fixed {
+  background-image: url("../images/b_tile_placed.png");
+}
+
+.c_tile.fixed {
+    background-image: url("../images/c_tile_placed.png");
+}
+
+.d_tile.fixed {
+    background-image: url("../images/d_tile_placed.png");
+}
+
+.e_tile.fixed {
+    background-image: url("../images/e_tile_placed.png");
+}
+
+.f_tile.fixed {
+    background-image: url("../images/f_tile_placed.png");
+}
+
+.g_tile.fixed {
+    background-image: url("../images/g_tile_placed.png");
+}
+
+.h_tile.fixed {
+    background-image: url("../images/h_tile_placed.png");
+}
+
+.i_tile.fixed {
+    background-image: url("../images/i_tile_placed.png");
+}
+
+.j_tile.fixed {
+    background-image: url("../images/j_tile_placed.png");
+}
+
+.k_tile.fixed {
+    background-image: url("../images/k_tile_placed.png");
+}
+
+.l_tile.fixed {
+    background-image: url("../images/l_tile_placed.png");
+}
+
+.m_tile.fixed {
+    background-image: url("../images/m_tile_placed.png");
+}
+
+.n_tile.fixed {
+    background-image: url("../images/n_tile_placed.png");
+}
+
+.o_tile.fixed {
+    background-image: url("../images/o_tile_placed.png");
+}
+
+.p_tile.fixed {
+    background-image: url("../images/p_tile_placed.png");
+}
+
+.q_tile.fixed {
+    background-image: url("../images/q_tile_placed.png");
+}
+
+.r_tile.fixed {
+    background-image: url("../images/r_tile_placed.png");
+}
+
+.s_tile.fixed {
+    background-image: url("../images/s_tile_placed.png");
+}
+
+.t_tile.fixed {
+    background-image: url("../images/t_tile_placed.png");
+}
+
+.u_tile.fixed {
+    background-image: url("../images/u_tile_placed.png");
+}
+
+.v_tile.fixed {
+    background-image: url("../images/v_tile_placed.png");
+}
+
+.w_tile.fixed {
+  background-image: url('../images/w_tile.png');
+}
+
+.x_tile.fixed {
+    background-image: url("../images/x_tile_placed.png");
+}
+
+.y_tile.fixed {
+    background-image: url("../images/y_tile_placed.png");
+}
+
+.z_tile.fixed {
+    background-image: url("../images/z_tile_placed.png");
 }

@@ -1,5 +1,5 @@
+
 document.addEventListener("DOMContentLoaded", function() {
-  let boardDim = 14
   board = buildBoard(boardDim,boardDim);
   setBonuses();
   fillTileBag();
@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
   setButtonEvents()
 });
 
+let boardDim = 14
 const rackSize = 7;
 const playerCount = 4;
 let board = [];
@@ -16,6 +17,7 @@ let tileBag = [];
 let players = [];
 let currentPlayer = 1;
 let selectedTile = '';
+let wordsToValidate = [];
 
 function addPlayers(count) {
   if (count > 0) {
@@ -30,17 +32,412 @@ function addPlayers(count) {
   }
 }
 
+// recurses over an array of objects and returns the largest
+// value for a specified field
+function maxOfField(arr,field,idx) {
+  let max = arr[idx-1][field];
+  if (idx > 1) {
+    max = maxOfField(arr,field,idx-1)
+  }
+  if (arr[idx-1][field] > max) {
+    max = arr[idx-1][field];
+  }
+  return max;
+}
+
+// recurses over an array of objects and returns the largest
+// value for a specified field
+function minOfField(arr,field,idx) {
+  let min = arr[idx-1][field];
+  if (idx > 1) {
+    min = minOfField(arr,field,idx-1)
+  }
+  if (arr[idx-1][field] < min) {
+    min = arr[idx-1][field];
+  }
+  return min;
+}
+
+function submitWord() {
+  // playedWords = [{
+  //   direction : 'horizontal',
+  //   startRow : 3,
+  //   startCol : 4,
+  //   length : 5
+  // }]
+
+
+  let playedTiles = getPlayedTiles(boardDim,boardDim);
+  if (!validatePlacement(playedTiles)) {
+    return false;
+  }
+
+  let wordsValid = validateWords();
+  if (wordsValid) {
+    scoreWords();
+  } else {
+    returnTilesToRack();
+    nextPlayer();
+  }
+}
+
+function validateWords() {
+  console.error('validateWord not implemented!')
+
+  // let minCol = minOfField(playedTiles,'col',playedTiles.length);
+  // let maxCol = maxOfField(playedTiles,'col',playedTiles.length);
+  // let minRow = minOfField(playedTiles,'row',playedTiles.length);
+  // let maxRow = maxOfField(playedTiles,'row',playedTiles.length);
+  //
+  // let direction;
+  // if (maxCol-minCol > 0) {
+  //   direction = 'horizontal'
+  // } else if (maxRow-minRow > 0) {
+  //   direction = 'vertical'
+  // }
+  //
+  // let tile = board[minRow][minCol];
+  // let word = '';
+  // if (direction == 'horizontal') {
+  //   word = buildRight(tile);
+  // } else if (direction == 'vertical') {
+  //   word = buildDown(tile);
+  // } else {
+  //   // console.log(`row ${minRow} col ${minCol}`);
+  //   // console.log(board[minRow][minCol]);
+  //   word = board[minRow][minCol].playedLetter.split('_')[0];
+  // }
+  // let idx = binaryFind(word,words,0,words.length-1)
+  // if (idx == -1) {
+  //   $('#message').text(`The word '${word}' is not valid.`);
+  //   return false;
+  // }
+}
+
+function scoreWords () {
+  console.error('scoreWord not implemented!');
+}
+
+function binaryFind(item,arr,start,end) {
+  let idx = -1;
+  if (item == arr[start]) {
+    return start;
+  }
+  if (item == arr[end]) {
+    return end;
+  }
+  if (start == end) {
+    return -1;
+  }
+  let mid = Math.floor((end+start)/2);
+  if (item == arr[mid]) {
+    return mid;
+  }
+
+  if (item < arr[mid]) {
+    if (mid - start == 1) {
+      return -1;
+    }
+    idx = binaryFind(item,arr,start+1,mid);
+  } else {
+    if (end - mid == 1) {
+      return -1;
+    }
+    idx = binaryFind(item,arr,mid,end-1);
+  }
+  return idx;
+}
+
+function checkIfTilesPlayed(playedTiles) {
+  if (playedTiles.length == 0) {
+    return { valid: false, message : 'You must play at least one tile.' };
+  }
+  return { valid: true };
+}
+
+function checkIfFirstPlayOnStar() {
+  if (board[7][7].playedLetter == '' && board[7][7].fixedLetter == '') {
+    return { valid: false, message : 'The first word must cover the star.' };
+  }
+  return { valid: true };
+}
+
+function checkIfTilesAligned(playedTiles, idx) {
+  if (playedTiles.length == 1) {
+    return true;
+  }
+  let alignment;
+  // alignment =  false or { row : 1, col : 2 }
+
+  let currentRow = playedTiles[idx].row;
+  let currentCol = playedTiles[idx].col;
+
+  if (idx > 0) {
+    alignment = checkIfTilesAligned(playedTiles, idx-1);  // recurse through tiles
+    if (alignment == false) {  // once it fails, bubble the failure up
+      return false;
+    }
+  }
+
+  if (alignment == undefined) { // first tile
+    return { row : currentRow, col : currentCol };
+  }
+
+  if (alignment.direction == undefined) { // second tile
+      // check that tile does not differ in both row and column from first tile
+      if (currentRow != alignment.row && currentCol != alignment.col ) {
+        return false;
+      }
+
+      // set direction based on second tile
+      if (currentRow == alignment.row) {
+        dir = 'horizontal';
+      } else {
+        dir = 'vertical';
+      }
+      return { row : currentRow, col : currentCol, direction : dir };
+  }
+
+  if (alignment.direction == 'horizontal' && currentRow != alignment.row) {
+    return false;
+  } else if (alignment.direction == 'vertical' && currentCol != alignment.col) {
+    return false;
+  }
+  return { row : alignment.row, col : alignment.col, direction : alignment.direction };
+}
+
+// Add all words to be checked (including the played word) to a queue to be check in the same way
+function checkForOtherWords(row, col, direction) {
+  otherWord = false;
+  if (direction = 'horizontal') {
+    if (col > 0 && board[row][col - 1].fixedLetter != '') {
+      otherWord = true
+    }
+    if (col < boardDim && board[row][col + 1].fixedLetter != '') {
+      otherWord = true
+    }
+    if (otherWord) {
+      let rightmost = seekRight(playedTiles[0].row, playedTiles[0].col);
+      wordsToValidate.push(buildLeft(row,rightmost));
+    }
+  } else {
+    if (row > 0 && board[row - 1][col].fixedLetter != '') {
+      otherWord = true
+    }
+    if (row < boardDim && board[row + 1][col].fixedLetter != '') {
+      otherWord = true
+    }
+    if (otherWord) {
+      let bottommost = seekDown(playedTiles[0].row, playedTiles[0].col);
+      wordsToValidate.push(buildUp(bottommost,col));
+    }
+  }
+}
+
+// starting from the bottommost tile in the contiguous word, recurse through the
+// word and build it from the top.
+function buildUp(row, col) {
+  // checkForOtherWords(row, col, 'horizontal')
+  console.log(`buildUp ${row} ${col}`);
+  checkForOtherWords(row, col, 'horizontal');
+  let word = [];
+  let letter = board[row][col].fixedLetter || board[row][col].playedLetter;
+  if (row > 0 && letter != '') {
+    word = buildUp(row - 1, col);
+  }
+  if (letter != '') {
+    word.push({
+      row : row,
+      col : col,
+      letter : letter.split('_')[0],
+      bonus : board[row][col].bonus,
+      played : (board[row][col].playedLetter != undefined)
+    })
+  }
+  return word;
+}
+
+// starting from the rightmost tile in the contiguous word, recurse through the
+// word and build it from the left.
+function buildLeft(row, col) {
+  console.log(`buildLeft ${row} ${col}`);
+  checkForOtherWords(row, col, 'vertical');
+  let word = [];
+  let letter = board[row][col].fixedLetter || board[row][col].playedLetter;
+  if (col > 0 && letter != '') {
+    word = buildLeft(row, col - 1);
+  }
+  if (letter != '') {
+    word.push({
+      row : row,
+      col : col,
+      letter : letter.split('_')[0],
+      bonus : board[row][col].bonus,
+      played : (board[row][col].playedLetter != undefined)
+    })
+  }
+  return word;
+}
+
+// find the righmost tile in the contiguous word
+function seekRight(row, col) {
+  let letter = board[row][col].playedLetter || board[row][col].fixedLetter;
+  let rightmost;
+  console.log(letter);
+  if (letter == '') {
+    rightmost = col - 1;
+  } else if (col < boardDim && letter != '') {
+    rightmost = seekRight(row,col + 1);
+  } else {
+    rightmost = col;
+  }
+  return rightmost;
+}
+
+// find the bottommost tile in the contiguous word
+function seekDown(row, col) {
+  let letter = board[row][col].playedLetter || board[row][col].fixedLetter;
+  let bottommost;
+  console.log(letter);
+  if (letter == '') {
+    bottommost = row - 1;
+  } else if (col < boardDim && letter != '') {
+    bottommost = seekDown(row + 1,col);
+  } else {
+    bottommost = row;
+  }
+  return bottommost;
+}
+
+function getPlayedTileCountFromWord(word, idx) {
+  let count = 0;
+  if (idx > 0) {
+    count = count + getPlayedTileCountFromWord(word, idx - 1)
+  }
+  console.log(idx);
+  if (word[idx].played) {
+    count++;
+  }
+  // console.log(`played letters in word: ${count}`);
+  return count;
+}
+
+function returnTilesToRack(playedTiles) {
+  console.error('returnTilesToRack not implemented!')
+}
+
+function validatePlacement(playedTiles) {
+  let word;
+  $('#message').text(''); // clear out any previous message
+
+  // ensure that at least one tile was played
+  let tilePlayed = checkIfTilesPlayed(playedTiles);
+  if (!tilePlayed.valid) {
+    $('#message').text(tilePlayed.message)
+    return false;
+  }
+
+  // ensure the first word played covers the center star
+  let starPlayed = checkIfFirstPlayOnStar();
+  if (!starPlayed.valid) {
+    $('#message').text(starPlayed.message)
+    return false;
+  }
+
+  let row = playedTiles[0].row;
+  let col = playedTiles[0].col;
+  if (playedTiles.length > 1) {
+    let tilesAligned = checkIfTilesAligned(playedTiles, playedTiles.length-1);
+    if (!tilesAligned) {
+      $('#message').text('Tiles must be placed vertically or horiontally.');
+      return false;
+    }
+
+    console.log('direction '+tilesAligned.direction);
+    if (tilesAligned.direction == 'vertical') {
+      let bottommost = seekDown(row, col);
+      word = buildUp(bottommost,col);
+    } else {
+      let rightmost = seekRight(row, col);
+      word = buildLeft(row,rightmost);
+    }
+
+    let playedCount = getPlayedTileCountFromWord(word, word.length - 1);
+    if (playedCount < playedTiles.length) {
+      $('#message').text(`There can't be any spaces between played tiles.`)
+      return false;
+    }
+  } else {
+
+    word = [{
+      row : row,
+      col : col,
+      letter : letter.split('_')[0],
+      bonus : board[row][col].bonus,
+      played : true
+    }]
+  }
+
+  // Check for adjacency to existing word.
+  console.log(word);
+  if (!checkAdjacency(word, word.length-1)) {
+    $('#message').text(`Your word must connect to an existing word.`)
+    return false;
+  }
+
+  $('#message').text('Placement is valid.');
+  wordsToValidate.push(word);
+  return true;
+}
+
+function checkAdjacency(word, idx) {
+  console.log(`letter ${word[idx].letter} idx ${idx}`);
+  if (wordsToValidate.length > 0 ) {
+    return true; // other connected words were found.
+  }
+  if (idx > 0) {
+    if (checkAdjacency(word, idx - 1)) {
+      return true;
+    }
+  }
+  if (word[idx].fixedLetter != '') {
+    return true;
+  }
+  return false;
+}
+
+function getPlayedTiles(row,col) {
+  let playedTiles = [];
+  if (col > 0) {
+    playedTiles = getPlayedTiles(row,col - 1);
+  } else if (row > 0){
+    playedTiles = getPlayedTiles(row-1,boardDim);
+  }
+  // console.log($(board[row][col])[0]);
+  if ($(board[row][col])[0].playedLetter != '') {
+    // console.log($(board[row][col])[0]);
+      playedTiles.push({
+        row:row,
+        col:col,
+        letter:$(board[row][col])[0].playedLetter
+    });
+  }
+  return playedTiles;
+}
+
 function setButtonEvents() {
-  $('#next_player').click(nextPlayer);
+  $('#pass_button').click(nextPlayer);
+  $('#submit_button').click(submitWord);
   let positions = $(`.position`);
-  setPositionEvents(positions,positions.length-1);
+  setPositionEvents(positions,positions.length);
 }
 
 function overPosition(e) {
+  let position = $(e.target).closest("div");
+  let row = $(position).attr('id').split('_')[1];
+  let col = $(position).attr('id').split('_')[2];
+  // console.log(`${row} ${col}`);
   if (selectedTile != '') {
-    let position = $(e.target);
-    let row = $(position).attr('id').split('_')[1];
-    let col = $(position).attr('id').split('_')[2];
     if (board[row][col].playedLetter == '' && board[row][col].fixedLetter == '') {
       let bonus = board[row][col].bonus;
       position.removeClass(bonus);
@@ -51,7 +448,7 @@ function overPosition(e) {
 
 function outPosition(e) {
   if (selectedTile != '') {
-      let position = $(e.target);
+      let position = $(e.target).closest("div");
     let row = $(position).attr('id').split('_')[1];
     let col = $(position).attr('id').split('_')[2];
     if (board[row][col].playedLetter == '' && board[row][col].fixedLetter == '') {
@@ -72,10 +469,12 @@ function placeTile(e) {
     if (board[row][col].playedLetter == '') {
 
       position.addClass($(`#${selectedTile}`).data('tileType'));
+      position.addClass('placed');
       position.data('playedTile',selectedTile);
       position.removeClass(bonus);
       let rackPos = selectedTile.split('_')[2];
       players[currentPlayer].tiles[rackPos] = '';
+      $(`#${selectedTile}`).data('position',`${row}_${col}`);
       $(`#${selectedTile}`).removeClass($(`#${selectedTile}`).data('tileType'));
       $(`#${selectedTile}`).addClass('empty_position');
       board[row][col].playedLetter = $(`#${selectedTile}`).data('tileType');
@@ -86,8 +485,10 @@ function placeTile(e) {
     let rackPos = position.data('playedTile').split('_')[2];
     let letter = board[row][col].playedLetter.split('_')[0];
     players[player].tiles[rackPos] = letter;
+    $(`#rack_${player}_${rackPos}`).removeData('position');
     $(`#rack_${player}_${rackPos}`).addClass(`${letter}_tile`);
     $(`#rack_${player}_${rackPos}`).removeClass('empty_position');
+    position.removeData('playedTile')
     board[row][col].playedLetter = '';
     position.addClass(bonus);
     position.removeClass(`${letter}_tile`);
@@ -97,7 +498,7 @@ function placeTile(e) {
 
 function setPositionEvents(positions,count) {
   if (count > 0) {
-    let position = positions[count];
+    let position = positions[count-1];
     $(position).hover(overPosition,outPosition);
     $(position).click(placeTile);
     setPositionEvents(positions,count-1);
@@ -164,13 +565,14 @@ function appendTiles(playerId,count) {
 
 function selectTile(e) {
   let playerId = $(e.target).attr('id').substring(5,6);
+    $(e.target).addClass('fixed');
   unselectTiles(playerId,players[playerId].tiles.length);
   if (!$(e.target).hasClass('placedTile') && selectedTile != $(e.target).attr('id')) {
-    $(e.target).addClass('selectedTile');
+    $(e.target).addClass('fixed');
     selectedTile = $(e.target).attr('id');
   } else {
     selectedTile = '';
-    $(e.target).removeClass('selectedTile');
+    $(e.target).removeClass('fixed');
   }
 }
 
@@ -178,7 +580,9 @@ function unselectTiles(playerId,count) {
   if (count > 0) {
     let player = players[playerId];
     unselectTiles(playerId,count-1);
-    $(`#rack_${playerId}_${count}`).removeClass('selectedTile');
+    $(`#rack_${playerId}_${count-1}`).removeClass('fixed');
+    // console.log(`#rack_${playerId}_${count-1}`);
+    // console.log($(`#rack_${playerId}_${count-1}`));
   }
 }
 
