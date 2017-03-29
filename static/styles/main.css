@@ -316,7 +316,7 @@ html {
 }
 
 .w_tile.fixed {
-  background-image: url('../images/w_tile.png');
+  background-image: url('../images/w_tile_placed.png');
 }
 
 .x_tile.fixed {

@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
   setBonuses();
   fillTileBag();
   addPlayers(playerCount);
-  fillRack(players);
+  fillRacks(players);
   displayRack(players,playerCount);
   setButtonEvents()
 });
@@ -58,15 +58,18 @@ function minOfField(arr,field,idx) {
   return min;
 }
 
+function fixTiles(playedTiles) {
+  if (playedTiles.length > 0) {
+    let tile = playedTiles.pop();
+    fixTiles(playedTiles);
+    board[tile.row][tile.col].fixedLetter = tile.letter;
+    board[tile.row][tile.col].playedLetter = '';
+    $(`#board_${tile.row}_${tile.col}`).addClass('fixed');
+    // console.log(tile);
+  }
+}
+
 function submitWord() {
-  // playedWords = [{
-  //   direction : 'horizontal',
-  //   startRow : 3,
-  //   startCol : 4,
-  //   length : 5
-  // }]
-
-
   let playedTiles = getPlayedTiles(boardDim,boardDim);
   if (!validatePlacement(playedTiles)) {
     return false;
@@ -74,48 +77,109 @@ function submitWord() {
 
   let wordsValid = validateWords();
   if (wordsValid) {
-    scoreWords();
+    players[currentPlayer].score += scoreWords();
+    fixTiles(playedTiles);
+    refillRack(currentPlayer,rackSize);
+    clearRacks(players,playerCount);
+    wordsToValidate = [];
+
   } else {
     returnTilesToRack();
-    nextPlayer();
   }
+  nextPlayer();
+}
+
+function assembleWord(word, idx) {
+  let wordStr = '';
+  if (idx > 0) {
+    wordStr = assembleWord(word, idx - 1);
+  }
+  wordStr = wordStr + word[idx].letter;
+  return wordStr;
 }
 
 function validateWords() {
-  console.error('validateWord not implemented!')
+  console.log(`validateWords ${wordsToValidate.length}` );
+  for (let word of wordsToValidate) {
+    let wordStr = assembleWord(word, word.length - 1);
+    let idx = binaryFind(wordStr,words,0,words.length-1)
+    if (idx == -1) {
+      console.log(wordStr + ' ' + idx);
+      $('#message').text(`The word '${wordStr}' is not valid.`);
+      return false;
+    }
+  }
+  return true;
+}
 
-  // let minCol = minOfField(playedTiles,'col',playedTiles.length);
-  // let maxCol = maxOfField(playedTiles,'col',playedTiles.length);
-  // let minRow = minOfField(playedTiles,'row',playedTiles.length);
-  // let maxRow = maxOfField(playedTiles,'row',playedTiles.length);
-  //
-  // let direction;
-  // if (maxCol-minCol > 0) {
-  //   direction = 'horizontal'
-  // } else if (maxRow-minRow > 0) {
-  //   direction = 'vertical'
-  // }
-  //
-  // let tile = board[minRow][minCol];
-  // let word = '';
-  // if (direction == 'horizontal') {
-  //   word = buildRight(tile);
-  // } else if (direction == 'vertical') {
-  //   word = buildDown(tile);
-  // } else {
-  //   // console.log(`row ${minRow} col ${minCol}`);
-  //   // console.log(board[minRow][minCol]);
-  //   word = board[minRow][minCol].playedLetter.split('_')[0];
-  // }
-  // let idx = binaryFind(word,words,0,words.length-1)
-  // if (idx == -1) {
-  //   $('#message').text(`The word '${word}' is not valid.`);
-  //   return false;
-  // }
+let tileValues = {
+  a : 1,
+  b : 3,
+  c : 3,
+  d : 2,
+  e : 1,
+  f : 4,
+  g : 2,
+  h : 4,
+  i : 1,
+  j : 8,
+  k : 5,
+  l : 1,
+  m : 3,
+  n : 1,
+  o : 1,
+  p : 3,
+  q : 10,
+  r : 1,
+  s : 1,
+  t : 1,
+  u : 1,
+  v : 4,
+  w : 4,
+  x : 8,
+  y : 4,
+  z : 10
+}
+
+function scoreWord(word, idx) {
+  let scoreObj = { score : 0, multiple : 1 };
+  if (idx > 0) {
+    scoreObj = scoreWord(word, idx - 1);
+  }
+  let letterScore = tileValues[word[idx].letter];
+  console.log(`letterScore ${letterScore} ${word[idx].letter}`);
+  if (word[idx].played) {
+    switch (word[idx].bonus) {
+      case 'double_letter_position':
+        letterScore = letterScore * 2;
+      break;
+      case 'triple_letter_position':
+        letterScore = letterScore * 3;
+      break;
+      case 'double_word_position':
+        scoreObj.multiple = scoreObj.multiple * 2;
+      break;
+      case 'start_position':
+        scoreObj.multiple = scoreObj.multiple * 2;
+      break;
+      case 'triple_word_position':
+        scoreObj.multiple = scoreObj.multiple * 3;
+      break;
+    }
+  }
+  scoreObj.score = scoreObj.score + letterScore;
+  console.log(scoreObj);
+  return scoreObj;
 }
 
 function scoreWords () {
-  console.error('scoreWord not implemented!');
+  let score = 0;
+  for (let word of wordsToValidate) {
+    let scoreObj =  scoreWord(word, word.length - 1);
+    score = score + scoreObj.score * scoreObj.multiple;
+  }
+  console.log(score);
+  return score;
 }
 
 function binaryFind(item,arr,start,end) {
@@ -209,7 +273,7 @@ function checkIfTilesAligned(playedTiles, idx) {
 // Add all words to be checked (including the played word) to a queue to be check in the same way
 function checkForOtherWords(row, col, direction) {
   otherWord = false;
-  if (direction = 'horizontal') {
+  if (direction == 'horizontal') {
     if (col > 0 && board[row][col - 1].fixedLetter != '') {
       otherWord = true
     }
@@ -217,8 +281,9 @@ function checkForOtherWords(row, col, direction) {
       otherWord = true
     }
     if (otherWord) {
-      let rightmost = seekRight(playedTiles[0].row, playedTiles[0].col);
-      wordsToValidate.push(buildLeft(row,rightmost));
+      console.log(`checkForOtherWords calling seekRight ${row} ${col} ${wordsToValidate.length}`);
+      let rightmost = seekRight(row, col);
+      wordsToValidate.push(buildLeft(row,rightmost,true));
     }
   } else {
     if (row > 0 && board[row - 1][col].fixedLetter != '') {
@@ -228,30 +293,32 @@ function checkForOtherWords(row, col, direction) {
       otherWord = true
     }
     if (otherWord) {
-      let bottommost = seekDown(playedTiles[0].row, playedTiles[0].col);
-      wordsToValidate.push(buildUp(bottommost,col));
+      let bottommost = seekDown(row, col);
+      wordsToValidate.push(buildUp(bottommost,col,true));
     }
   }
 }
 
 // starting from the bottommost tile in the contiguous word, recurse through the
 // word and build it from the top.
-function buildUp(row, col) {
-  // checkForOtherWords(row, col, 'horizontal')
-  console.log(`buildUp ${row} ${col}`);
-  checkForOtherWords(row, col, 'horizontal');
+function buildUp(row, col,shouldCheck) {
+  console.log(`buildUp ${row} ${col} horizontal`);
+  if (board[row][col].playedLetter != '' && shouldCheck) {
+    checkForOtherWords(row, col, 'horizontal');
+  }
   let word = [];
   let letter = board[row][col].fixedLetter || board[row][col].playedLetter;
   if (row > 0 && letter != '') {
-    word = buildUp(row - 1, col);
+    word = buildUp(row - 1, col,shouldCheck);
   }
   if (letter != '') {
+
     word.push({
       row : row,
       col : col,
       letter : letter.split('_')[0],
       bonus : board[row][col].bonus,
-      played : (board[row][col].playedLetter != undefined)
+      played : (board[row][col].playedLetter != '')
     })
   }
   return word;
@@ -259,13 +326,15 @@ function buildUp(row, col) {
 
 // starting from the rightmost tile in the contiguous word, recurse through the
 // word and build it from the left.
-function buildLeft(row, col) {
-  console.log(`buildLeft ${row} ${col}`);
-  checkForOtherWords(row, col, 'vertical');
+function buildLeft(row, col, shouldCheck) {
+  console.log(`buildLeft ${row} ${col} vertical`);
+  if (board[row][col].playedLetter != '' && shouldCheck) {
+    checkForOtherWords(row, col, 'vertical');
+  }
   let word = [];
   let letter = board[row][col].fixedLetter || board[row][col].playedLetter;
   if (col > 0 && letter != '') {
-    word = buildLeft(row, col - 1);
+    word = buildLeft(row, col - 1, shouldCheck);
   }
   if (letter != '') {
     word.push({
@@ -273,7 +342,7 @@ function buildLeft(row, col) {
       col : col,
       letter : letter.split('_')[0],
       bonus : board[row][col].bonus,
-      played : (board[row][col].playedLetter != undefined)
+      played : (board[row][col].playedLetter != '')
     })
   }
   return word;
@@ -282,8 +351,9 @@ function buildLeft(row, col) {
 // find the righmost tile in the contiguous word
 function seekRight(row, col) {
   let letter = board[row][col].playedLetter || board[row][col].fixedLetter;
+  console.log(`seekRight ${row} ${col} ${letter}`);
   let rightmost;
-  console.log(letter);
+  // console.log(letter);
   if (letter == '') {
     rightmost = col - 1;
   } else if (col < boardDim && letter != '') {
@@ -298,7 +368,7 @@ function seekRight(row, col) {
 function seekDown(row, col) {
   let letter = board[row][col].playedLetter || board[row][col].fixedLetter;
   let bottommost;
-  console.log(letter);
+  // console.log(letter);
   if (letter == '') {
     bottommost = row - 1;
   } else if (col < boardDim && letter != '') {
@@ -314,7 +384,7 @@ function getPlayedTileCountFromWord(word, idx) {
   if (idx > 0) {
     count = count + getPlayedTileCountFromWord(word, idx - 1)
   }
-  console.log(idx);
+  // console.log(idx);
   if (word[idx].played) {
     count++;
   }
@@ -353,13 +423,14 @@ function validatePlacement(playedTiles) {
       return false;
     }
 
-    console.log('direction '+tilesAligned.direction);
+    // console.log('direction '+tilesAligned.direction);
     if (tilesAligned.direction == 'vertical') {
       let bottommost = seekDown(row, col);
-      word = buildUp(bottommost,col);
+      word = buildUp(bottommost,col,true);
     } else {
+      console.log(`validatePlacement calling seekRight ${row} ${col}`);
       let rightmost = seekRight(row, col);
-      word = buildLeft(row,rightmost);
+      word = buildLeft(row,rightmost,true);
     }
 
     let playedCount = getPlayedTileCountFromWord(word, word.length - 1);
@@ -367,31 +438,40 @@ function validatePlacement(playedTiles) {
       $('#message').text(`There can't be any spaces between played tiles.`)
       return false;
     }
-  } else {
 
-    word = [{
-      row : row,
-      col : col,
-      letter : letter.split('_')[0],
-      bonus : board[row][col].bonus,
-      played : true
-    }]
+    let isAdjacent = checkAdjacency(word, word.length-1);
+    console.log(`isAdjacent ${isAdjacent}`);
+    if (!isAdjacent) {
+      $('#message').text(`Your word must connect to an existing word.`)
+      return false;
+    }
+    wordsToValidate.push(word);
+
+  } else {
+    console.log(`Single Letter Word`);
+    let rightmost = seekRight(row, col);
+    horizontalWord = buildLeft(row,rightmost,false);
+    if (horizontalWord.length > 1 ) {
+      wordsToValidate.push(horizontalWord);
+    }
+    console.log(horizontalWord);
+    let bottommost = seekDown(row, col);
+    verticalWord = buildUp(bottommost,col,false);
+    if (verticalWord.length > 1 ) {
+      wordsToValidate.push(verticalWord);
+    }
+    console.log(verticalWord);
   }
 
   // Check for adjacency to existing word.
-  console.log(word);
-  if (!checkAdjacency(word, word.length-1)) {
-    $('#message').text(`Your word must connect to an existing word.`)
-    return false;
-  }
+  // console.log(word);
 
   $('#message').text('Placement is valid.');
-  wordsToValidate.push(word);
   return true;
 }
 
 function checkAdjacency(word, idx) {
-  console.log(`letter ${word[idx].letter} idx ${idx}`);
+  // console.log(`letter ${word[idx].letter} idx ${idx}`);
   if (wordsToValidate.length > 0 ) {
     return true; // other connected words were found.
   }
@@ -511,14 +591,14 @@ function nextPlayer() {
   } else {
     currentPlayer++;
   }
-  clearRack(players,playerCount);
+  clearRacks(players,playerCount);
   displayRack(players,playerCount);
 }
 
-function clearRack(players,id) {
+function clearRacks(players,id) {
   if (id > 0) {
     let player = players[id-1];
-    clearRack(players,id-1);
+    clearRacks(players,id-1);
     $(`#player_${id-1}`).empty();
     $(`#player_${id-1}`).append(`<div class="h4 text-left player_title">Player ${id-1} - Score: ${players[id-1].score}</div>`);
   }
@@ -586,13 +666,23 @@ function unselectTiles(playerId,count) {
   }
 }
 
-function fillRack(players) {
+function fillRacks(players) {
   if (players.length > 0) {
     let player = players.pop();
-    fillRack(players);
+    fillRacks(players);
     player.tiles = pickTiles(7-player.tiles.length);
     players.push(player);
   }
+}
+
+function refillRack(id,idx) {
+  if (idx > 0) {
+    refillRack(id,idx - 1);
+  }
+  if (tileBag.length > 0 && players[id].tiles[idx] == '') {
+    players[id].tiles[idx] = pickTiles(1)[0];
+  }
+  // console.log(players[id].tiles);
 }
 
 function pickTiles(count) {
@@ -632,7 +722,7 @@ function fillTileBag() {
   addLetterToBag('x', 1);
   addLetterToBag('y', 2);
   addLetterToBag('z', 1);
-  addLetterToBag('blank', 2);
+  // addLetterToBag('blank', 2);
 }
 
 function addLetterToBag(letter, count) {
