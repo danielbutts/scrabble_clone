@@ -69,6 +69,43 @@ function fixTiles(playedTiles) {
   }
 }
 
+function clearInvalidTiles(playedTiles) {
+  // console.log(playedTiles);
+  if (playedTiles.length > 0) {
+    let tile = playedTiles.pop();
+    clearInvalidTiles(playedTiles);
+    let row = tile.row;
+    let col = tile.col;
+    // console.log(board[row][col]);
+    let bonus = board[row][col].bonus
+    let letter = board[row][col].playedLetter;
+    board[row][col].fixedLetter = '';
+    board[row][col].playedLetter = '';
+    let position = $(`#board_${row}_${col}`);
+    position.removeClass(tile.letter);
+    position.addClass(bonus);
+    position.removeClass('placed');
+    $(board[row][col]).data('playedTile',undefined);
+    // console.log(players[currentPlayer].tiles)
+    returnTileToRack(letter,players[currentPlayer].tiles.length - 1)
+  }
+}
+
+function returnTileToRack(letter,idx) {
+  returned = false;
+  if (idx > 0) {
+    returned = returnTileToRack(letter,idx - 1);
+  }
+  let player = players[currentPlayer];
+
+  if (!returned && player.tiles[idx] == '') {
+    player.tiles[idx] = letter.split('_')[0];
+    returned = true;
+  }
+
+  return returned;
+}
+
 function submitWord() {
   let playedTiles = getPlayedTiles(boardDim,boardDim);
   if (!validatePlacement(playedTiles)) {
@@ -84,7 +121,10 @@ function submitWord() {
     wordsToValidate = [];
 
   } else {
-    returnTilesToRack();
+    clearInvalidTiles(playedTiles);
+    wordsToValidate = [];
+
+    // returnTilesToRack(playedTiles);
   }
   nextPlayer();
 }
@@ -392,10 +432,6 @@ function getPlayedTileCountFromWord(word, idx) {
   return count;
 }
 
-function returnTilesToRack(playedTiles) {
-  console.error('returnTilesToRack not implemented!')
-}
-
 function validatePlacement(playedTiles) {
   let word;
   $('#message').text(''); // clear out any previous message
@@ -506,7 +542,7 @@ function getPlayedTiles(row,col) {
 }
 
 function setButtonEvents() {
-  $('#pass_button').click(nextPlayer);
+  $('#pass_button').click(passTurn);
   $('#submit_button').click(submitWord);
   let positions = $(`.position`);
   setPositionEvents(positions,positions.length);
@@ -583,6 +619,12 @@ function setPositionEvents(positions,count) {
     $(position).click(placeTile);
     setPositionEvents(positions,count-1);
   }
+}
+
+function passTurn() {
+  let playedTiles = getPlayedTiles(boardDim,boardDim);
+  clearInvalidTiles(playedTiles);
+  nextPlayer();
 }
 
 function nextPlayer() {
