@@ -3,19 +3,17 @@ document.addEventListener("DOMContentLoaded", function() {
   board = buildBoard(boardDim,boardDim);
   setBonuses();
   fillTileBag();
-  addPlayers(playerCount);
-  fillRacks(players);
-  displayRack(players,playerCount);
+  // displayRack(players,playerCount);
   setButtonEvents()
 });
 
 let boardDim = 14
 const rackSize = 7;
-const playerCount = 4;
+let playerCount = 4;
 let board = [];
 let tileBag = [];
 let players = [];
-let currentPlayer = 1;
+let currentPlayer = 0;
 let selectedTile = '';
 let wordsToValidate = [];
 
@@ -490,13 +488,20 @@ function validatePlacement(playedTiles) {
     if (horizontalWord.length > 1 ) {
       wordsToValidate.push(horizontalWord);
     }
-    console.log(horizontalWord);
     let bottommost = seekDown(row, col);
     verticalWord = buildUp(bottommost,col,false);
     if (verticalWord.length > 1 ) {
       wordsToValidate.push(verticalWord);
     }
-    console.log(verticalWord);
+    if (wordsToValidate.length == 0) {
+      wordsToValidate.push([{
+        row : row,
+        col : col,
+        letter : board[row][col].playedLetter.split('_')[0],
+        bonus : board[row][col].bonus,
+        played : true
+      }]);
+    }
   }
 
   // Check for adjacency to existing word.
@@ -541,9 +546,26 @@ function getPlayedTiles(row,col) {
   return playedTiles;
 }
 
+function setPlayerCount(e) {
+  let position = $(e.target);
+  playerCount = $(position).attr('id').split('_')[0];
+  addPlayers(playerCount);
+  fillRacks(players);
+  clearRacks(players,playerCount);
+  $('#playerButtons').addClass('isHidden')
+  $('#players').removeClass('isHidden')
+  $('#buttons').removeClass('isHidden')
+  showCurrentPlayer();
+}
+
 function setButtonEvents() {
+  $('#ready_button').click(showCurrentPlayer);
   $('#pass_button').click(passTurn);
   $('#submit_button').click(submitWord);
+  $('#1_player_button').click(setPlayerCount);
+  $('#2_player_button').click(setPlayerCount);
+  $('#3_player_button').click(setPlayerCount);
+  $('#4_player_button').click(setPlayerCount);
   let positions = $(`.position`);
   setPositionEvents(positions,positions.length);
 }
@@ -634,6 +656,16 @@ function nextPlayer() {
     currentPlayer++;
   }
   clearRacks(players,playerCount);
+  $('#ready_button').removeClass('isHidden');
+  $('#pass_button').addClass('isHidden');
+  $('#submit_button').addClass('isHidden');
+}
+
+function showCurrentPlayer() {
+  $('#message').text(``);
+  $('#ready_button').addClass('isHidden');
+  $('#pass_button').removeClass('isHidden');
+  $('#submit_button').removeClass('isHidden');
   displayRack(players,playerCount);
 }
 
@@ -646,10 +678,10 @@ function clearRacks(players,id) {
   }
 }
 
-function displayRack(players,id) {
-  if (id > 0) {
-    let player = players[id-1];
-    displayRack(players,id-1);
+function displayRack(players,idx) {
+  if (idx > 0) {
+    let player = players[idx-1];
+    displayRack(players,idx-1);
     appendTiles(player.id,player.tiles.length)
   }
 }

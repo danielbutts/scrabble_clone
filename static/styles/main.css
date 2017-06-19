@@ -71,25 +71,9 @@ html {
   height: calc(var(--tile-dim) + 10px);
 }
 
-/*.rack_tile.currentPlayer:hover {
-  border:5px solid #EAAFB4;
+.isHidden {
+  display:none;
 }
-
-.rack_tile.selectedTile {
-  border:5px solid #4273BF;
-}
-
-.rack_tile.selectedTile:hover {
-  border:5px solid #4273BF;
-}*/
-
-/*.rack_tile.placedTile {
-  border:5px solid darkgray;
-}*/
-
-/*.rack_tile.selected {
-  border:5px solid darkgray;
-}*/
 
 .empty_position {
   background-image: url("../images/empty_tile.png");

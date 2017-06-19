@@ -9,7 +9,7 @@
     <script src="./static/scripts/words.js"></script>
     <script src="./static/scripts/main.js"></script>
 
-    <title></title>
+    <title>Scrabble Clone</title>
   </head>
   <body>
     <div class="container-fluid">
@@ -19,10 +19,17 @@
         </div>
         <div class="col-xs-5 text-center outer">
           <div id="side-board" class="side-board">
-            <div id="players"></div>
-            <div id="buttons">
-              <button id="submit_button" type="button">Submit</button>
+            <div id="players" class="isHidden"></div>
+            <div id="playerButtons">
+              <button id="1_player_button" type="button">1</button>
+              <button id="2_player_button" type="button">2</button>
+              <button id="3_player_button" type="button">3</button>
+              <button id="4_player_button" type="button">4</button>
+            </div>
+            <div id="buttons" class="isHidden">
+              <button id="submit_button" type="button">Play</button>
               <button id="pass_button" type="button">Pass</button>
+              <button id="ready_button" class="isHidden" type="button">Ready?</button>
             </div>
             <div id="message"></div>
           </div>
