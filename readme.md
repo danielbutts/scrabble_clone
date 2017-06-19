@@ -1,5 +1,4 @@
 # Scrabble Clone
-#### Created by Daniel
 * * *
 
 ![screenshot](https://github.com/danielbutts/scrabble_clone/blob/master/static/images/screenshot.png)
